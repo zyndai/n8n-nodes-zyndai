@@ -1,8 +1,8 @@
 {
-	"node": "n8n-nodes-search-agent",
+	"node": "zynd-nodes.search-agent",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": ["Development", "Developer Tools"],
+	"categories": ["Development", "Developer Tools", "Zynd Nodes"],
 	"resources": {
 		"credentialDocumentation": [
 			{

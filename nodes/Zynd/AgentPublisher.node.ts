@@ -41,6 +41,8 @@ export class AgentPublisher implements INodeType {
         const n8nApiUrl = this.getInstanceBaseUrl();
         const workflowId = this.getWorkflow();
         let webHookId: string;
+        let webhookType: "NORMAL" | "X402" = "NORMAL";
+        let webhookPath = "";
 
 
         // Process each input item
@@ -61,9 +63,17 @@ export class AgentPublisher implements INodeType {
                     returnFullResponse: false,
                 });
 
+                this.logger.debug(`==== ${JSON.stringify(workflowResponse)}`)
 
                 try {
-                    webHookId = workflowResponse.nodes.filter((node: any) => node.type === 'n8n-nodes-base.webhook')[0].webhookId;
+                    webHookId = workflowResponse.nodes.filter((node: any) => {
+                        if (node.type === 'n8n-nodes-base.webhook' || node.type === 'CUSTOM.x402Webhook') {
+                            webhookType = "X402";
+                            webhookPath = node.parameters.path;
+                            return true;
+                        }
+                        return false
+                    })[0].webhookId;
                 } catch {
                     throw new Error('Add webhook node to your workflow before publishing the agent.');
                 }
@@ -122,7 +132,15 @@ export class AgentPublisher implements INodeType {
                 // Extract webhook ID from workflow response and update agent with webhook URL on zynd
 
                 if (webHookId) {
-                    const webhookUrl = `${n8nApiUrl}webhook/${webHookId}`;
+                    let webhookUrl: string;
+
+                    if (webhookType === "NORMAL") {
+                        webhookUrl = `${n8nApiUrl}webhook/${webHookId}`;
+                    } else {
+                        webhookUrl = `${n8nApiUrl}webhook/${webHookId}/${webhookPath}`;
+                    }
+
+                    this.logger.error(`======= ${webhookUrl}`)
 
                     await this.helpers.httpRequest({
                         method: 'POST',

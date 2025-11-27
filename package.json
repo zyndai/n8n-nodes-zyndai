@@ -36,7 +36,8 @@
 		"nodes": [
 			"dist/nodes/Zynd/SearchAgent.node.js",
 			"dist/nodes/Zynd/AgentPublisher.node.js",
-			"dist/nodes/Zynd/X402Webhook.node.js"
+			"dist/nodes/Zynd/X402Webhook.node.js",
+			"dist/nodes/Zynd/X402RespondToWebhook.node.js"
 		]
 	},
 	"devDependencies": {
@@ -51,7 +52,14 @@
 		"n8n-workflow": "*"
 	},
 	"dependencies": {
+		"@types/basic-auth": "^1.1.8",
+		"@types/jsonwebtoken": "^9.0.10",
+		"basic-auth": "^2.0.1",
+		"isbot": "^5.1.32",
+		"jsonwebtoken": "^9.0.2",
 		"thirdweb": "^5.112.4",
-		"viem": "^2.39.3"
+		"tmp-promise": "^3.0.3",
+		"viem": "^2.39.3",
+		"x402": "^0.7.3"
 	}
 }

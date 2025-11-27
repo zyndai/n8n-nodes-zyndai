@@ -1,10 +1,14 @@
 {
 	"compilerOptions": {
 		"strict": true,
-		"module": "commonjs",
-		"moduleResolution": "node",
-		"target": "es2019",
-		"lib": ["es2019", "es2020", "es2022.error"],
+		"module": "Node16",
+		"moduleResolution": "Node16",
+		"target": "ES2022",
+		"lib": [
+			"es2019",
+			"es2020",
+			"es2022.error"
+		],
 		"removeComments": true,
 		"useUnknownInCatchVariables": false,
 		"forceConsistentCasingInFileNames": true,
@@ -20,7 +24,15 @@
 		"sourceMap": true,
 		"skipLibCheck": true,
 		"outDir": "./dist/",
-		"types": ["node"]
+		"types": [
+			"node"
+		]
 	},
-	"include": ["credentials/**/*", "nodes/**/*", "nodes/**/*.json", "package.json", "AgentPublisher.node.ts"]
+	"include": [
+		"credentials/**/*",
+		"nodes/**/*",
+		"nodes/**/*.json",
+		"package.json",
+		"AgentPublisher.node.ts"
+	]
 }
