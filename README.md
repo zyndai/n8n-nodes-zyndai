@@ -1,247 +1,382 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+# n8n-nodes-zyndai
 
-# n8n-nodes-starter
+Custom n8n nodes for integrating with the ZyndAI network and Web3 payment protocols (X402).
 
-This starter repository helps you build custom integrations for [n8n](https://n8n.io). It includes example nodes, credentials, the node linter, and all the tooling you need to get started.
+## Overview
 
-## Quick Start
+This package provides custom n8n nodes that enable:
+- **Zynd Agent Search**: Discover agents by capabilities on the ZyndAI network
+- **Zynd Agent Publisher**: Publish your n8n workflows as agents to the ZyndAI registry
+- **X402 Webhook**: Webhook node with built-in Web3 payment verification using the x402 protocol
+- **X402 Respond to Webhook**: Custom response node for X402 webhooks with payment settlement
 
-> [!TIP]
-> **New to building n8n nodes?** The fastest way to get started is with `npm create @n8n/node`. This command scaffolds a complete node package for you using the [@n8n/node-cli](https://www.npmjs.com/package/@n8n/node-cli).
+## Features
 
-**To create a new node package from scratch:**
-
-```bash
-npm create @n8n/node
-```
-
-**Already using this starter? Start developing with:**
-
-```bash
-npm run dev
-```
-
-This starts n8n with your nodes loaded and hot reload enabled.
-
-## What's Included
-
-This starter repository includes two example nodes to learn from:
-
-- **[Example Node](nodes/Example/)** - A simple starter node that shows the basic structure with a custom `execute` method
-- **[GitHub Issues Node](nodes/GithubIssues/)** - A complete, production-ready example built using the **declarative style**:
-  - **Low-code approach** - Define operations declaratively without writing request logic
-  - Multiple resources (Issues, Comments)
-  - Multiple operations (Get, Get All, Create)
-  - Two authentication methods (OAuth2 and Personal Access Token)
-  - List search functionality for dynamic dropdowns
-  - Proper error handling and typing
-  - Ideal for HTTP API-based integrations
-
-> [!TIP]
-> The declarative/low-code style (used in GitHub Issues) is the recommended approach for building nodes that interact with HTTP APIs. It significantly reduces boilerplate code and handles requests automatically.
-
-Browse these examples to understand both approaches, then modify them or create your own.
-
-## Finding Inspiration
-
-Looking for more examples? Check out these resources:
-
-- **[npm Community Nodes](https://www.npmjs.com/search?q=keywords:n8n-community-node-package)** - Browse thousands of community-built nodes on npm using the `n8n-community-node-package` tag
-- **[n8n Built-in Nodes](https://github.com/n8n-io/n8n/tree/master/packages/nodes-base/nodes)** - Study the source code of n8n's official nodes for production-ready patterns and best practices
-- **[n8n Credentials](https://github.com/n8n-io/n8n/tree/master/packages/nodes-base/credentials)** - See how authentication is implemented for various services
-
-These are excellent resources to understand how to structure your nodes, handle different API patterns, and implement advanced features.
+- Web3 wallet integration using Viem
+- X402 payment protocol support for monetizing webhooks
+- Multi-network support (Ethereum, Base, Polygon, Arbitrum, Optimism, and testnets)
+- Synchronous and asynchronous payment settlement modes
+- ZyndAI agent registry integration
+- DID-based wallet generation from seed phrases
 
 ## Prerequisites
 
-Before you begin, install the following on your development machine:
+- **Node.js** (v18 or higher recommended) and npm
+- **Docker** and **Docker Compose** (for Docker installation method)
+- **ngrok** (for Docker method - automatically used by run script)
+- **n8n** (for manual installation)
+- **jq** (for run script - to parse ngrok JSON output)
 
-### Required
+## Installation
 
-- **[Node.js](https://nodejs.org/)** (v22 or higher) and npm
-  - Linux/Mac/WSL: Install via [nvm](https://github.com/nvm-sh/nvm)
-  - Windows: Follow [Microsoft's NodeJS guide](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows)
-- **[git](https://git-scm.com/downloads)**
+There are two methods to run this project:
 
-### Recommended
+### Method 1: Docker (Recommended)
 
-- Follow n8n's [development environment setup guide](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/)
+This method uses Docker Compose with ngrok for automatic public URL setup.
 
-> [!NOTE]
-> The `@n8n/node-cli` is included as a dev dependency and will be installed automatically when you run `npm install`. The CLI includes n8n for local development, so you don't need to install n8n globally.
-
-## Getting Started with this Starter
-
-Follow these steps to create your own n8n community node package:
-
-### 1. Create Your Repository
-
-[Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template, then clone it:
+#### Start the Infrastructure
 
 ```bash
-git clone https://github.com/<your-organization>/<your-repo-name>.git
-cd <your-repo-name>
+./run.sh
 ```
 
-### 2. Install Dependencies
+This script will:
+1. Start ngrok tunnel on port 5678
+2. Automatically configure environment variables (.env file)
+3. Build and start n8n in Docker with the custom nodes pre-installed
+4. Make your n8n instance publicly accessible via ngrok URL
+
+Access n8n at the ngrok URL displayed in the console (e.g., `https://xxxx.ngrok-free.app`)
+
+#### Stop the Infrastructure
+
+```bash
+./stop.sh
+```
+
+This will stop and clean up the ngrok process.
+
+### Method 2: Manual Installation
+
+For local development without Docker.
+
+#### Step 1: Install n8n globally
+
+```bash
+npm install -g n8n
+```
+
+#### Step 2: Build the package
 
 ```bash
 npm install
-```
-
-This installs all required dependencies including the `@n8n/node-cli`.
-
-### 3. Explore the Examples
-
-Browse the example nodes in [nodes/](nodes/) and [credentials/](credentials/) to understand the structure:
-
-- Start with [nodes/Example/](nodes/Example/) for a basic node
-- Study [nodes/GithubIssues/](nodes/GithubIssues/) for a real-world implementation
-
-### 4. Build Your Node
-
-Edit the example nodes to fit your use case, or create new node files by copying the structure from [nodes/Example/](nodes/Example/).
-
-> [!TIP]
-> If you want to scaffold a completely new node package, use `npm create @n8n/node` to start fresh with the CLI's interactive generator.
-
-### 5. Configure Your Package
-
-Update `package.json` with your details:
-
-- `name` - Your package name (must start with `n8n-nodes-`)
-- `author` - Your name and email
-- `repository` - Your repository URL
-- `description` - What your node does
-
-Make sure your node is registered in the `n8n.nodes` array.
-
-### 6. Develop and Test Locally
-
-Start n8n with your node loaded:
-
-```bash
-npm run dev
-```
-
-This command runs `n8n-node dev` which:
-
-- Builds your node with watch mode
-- Starts n8n with your node available
-- Automatically rebuilds when you make changes
-- Opens n8n in your browser (usually http://localhost:5678)
-
-You can now test your node in n8n workflows!
-
-> [!NOTE]
-> Learn more about CLI commands in the [@n8n/node-cli documentation](https://www.npmjs.com/package/@n8n/node-cli).
-
-### 7. Lint Your Code
-
-Check for errors:
-
-```bash
-npm run lint
-```
-
-Auto-fix issues when possible:
-
-```bash
-npm run lint:fix
-```
-
-### 8. Build for Production
-
-When ready to publish:
-
-```bash
 npm run build
 ```
 
-This compiles your TypeScript code to the `dist/` folder.
-
-### 9. Prepare for Publishing
-
-Before publishing:
-
-1. **Update documentation**: Replace this README with your node's documentation. Use [README_TEMPLATE.md](README_TEMPLATE.md) as a starting point.
-2. **Update the LICENSE**: Add your details to the [LICENSE](LICENSE.md) file.
-3. **Test thoroughly**: Ensure your node works in different scenarios.
-
-### 10. Publish to npm
-
-Publish your package to make it available to the n8n community:
+#### Step 3: Link the package globally
 
 ```bash
-npm publish
+npm link
 ```
 
-Learn more about [publishing to npm](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
+This makes `n8n-nodes-zyndai` available as a global npm package.
 
-### 11. Submit for Verification (Optional)
+#### Step 4: Create custom nodes directory
 
-Get your node verified for n8n Cloud:
+The location depends on your operating system:
 
-1. Ensure your node meets the [requirements](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/):
-   - Uses MIT license ✅ (included in this starter)
-   - No external package dependencies
-   - Follows n8n's design guidelines
-   - Passes quality and security review
+**Linux/macOS:**
+```bash
+mkdir -p ~/.n8n/custom
+cd ~/.n8n/custom
+```
 
-2. Submit through the [n8n Creator Portal](https://creators.n8n.io/nodes)
+**Windows (PowerShell):**
+```powershell
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.n8n\custom"
+cd "$env:USERPROFILE\.n8n\custom"
+```
 
-**Benefits of verification:**
+**Windows (Command Prompt):**
+```cmd
+mkdir %USERPROFILE%\.n8n\custom
+cd %USERPROFILE%\.n8n\custom
+```
 
-- Available directly in n8n Cloud
-- Discoverable in the n8n nodes panel
-- Verified badge for quality assurance
-- Increased visibility in the n8n community
+#### Step 5: Link the package in the custom directory
 
-## Available Scripts
+```bash
+npm link n8n-nodes-zyndai
+```
 
-This starter includes several npm scripts to streamline development:
+This creates a symlink to your globally linked package.
+
+#### Step 6: Start n8n
+
+```bash
+npx n8n start
+```
+
+Your custom nodes will now be available in n8n at `http://localhost:5678`
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file in the project root. Use `.env.example` as a template:
+
+```bash
+cp .env.example .env
+```
+
+#### Required Environment Variables:
+
+```env
+# Database Configuration
+DB_TYPE=sqlite
+
+# N8N Encryption Key
+# Get from existing n8n: docker exec -it <container_name> printenv N8N_ENCRYPTION_KEY
+# Or generate a new one for fresh installations
+N8N_ENCRYPTION_KEY=your_encryption_key_here
+
+# Logging
+N8N_LOG_LEVEL=debug
+N8N_LOG_OUTPUT=console
+CODE_ENABLE_STDOUT=true
+
+# Network Configuration (auto-generated by run.sh for Docker method)
+N8N_HOST=
+N8N_EDITOR_BASE_URL=
+N8N_PUBLIC_API_BASE_URL=
+WEBHOOK_URL=
+N8N_PORT=5678
+N8N_PROTOCOL=https
+```
+
+**Note**: For the Docker method, network variables are automatically configured by `run.sh`. For manual installation, configure these according to your setup.
+
+### Credentials Setup in n8n
+
+After starting n8n, configure the following credentials:
+
+#### ZyndAI API Credentials
+1. Navigate to **Settings > Credentials** in n8n
+2. Create **ZyndAI API** credential:
+   - **API URL**: `https://registry.zynd.ai` (default)
+   - **Zynd API Key**: Get from [https://dashboard.zynd.ai](https://dashboard.zynd.ai)
+   - **N8N API Key**: Generate from n8n **Settings > API**
+
+#### Web3 Wallet Credentials (Optional)
+Required for Web3-enabled features. Configure as needed for your use case.
+
+## Available Nodes
+
+### 1. Zynd Agent Search
+
+Search for agents by capabilities on the ZyndAI network.
+
+**Parameters:**
+- **Agent Keyword**: Search by name, description, etc.
+- **Capabilities**: Multi-select capabilities filter
+
+**Use Case**: Discover and integrate existing agents from the ZyndAI network into your workflows.
+
+### 2. Zynd Agent Publisher
+
+Publish your n8n workflows as agents to the ZyndAI registry.
+
+**Requirements:**
+- ZyndAI API credentials configured
+- Workflow containing a webhook node
+
+**Use Case**: Share your n8n workflows as reusable agents on the ZyndAI network.
+
+### 3. X402 Webhook
+
+Webhook node with integrated Web3 payment verification using the x402 protocol.
+
+**Parameters:**
+- **HTTP Method**: GET, POST, PUT, DELETE, PATCH
+- **Path**: Webhook endpoint path
+- **Response Mode**:
+  - **On Received**: Returns data immediately
+  - **Response Node**: Use X402 Respond to Webhook node
+- **Facilitator URL**: x402 payment facilitator endpoint
+- **Server Wallet Address**: Ethereum address to receive payments (0x...)
+- **Price**: Payment amount (e.g., `$0.01`)
+- **Network**: Blockchain network selection
+
+**Supported Networks:**
+- Base
+- Base Sepolia (Testnet)
+- Ethereum
+- Ethereum Sepolia (Testnet)
+- Polygon
+- Arbitrum
+- Arbitrum Sepolia (Testnet)
+- Optimism
+
+**Options:**
+- **Require Payment**: Toggle payment requirement (default: true)
+- **Description**: Payment description
+- **MIME Type**: Response content type (default: `application/json`)
+- **Max Timeout Seconds**: Payment validity duration (default: 60)
+- **Include Payment Details**: Add payment info to workflow data
+- **Settlement Mode**:
+  - **Synchronous**: Settle payment before responding
+  - **Asynchronous**: Settle payment in background
+
+**Use Case**: Monetize your webhooks by requiring Web3 payments before processing requests.
+
+### 4. X402 Respond to Webhook
+
+Custom response node for X402 webhooks with payment header support.
+
+**Parameters:**
+- **Respond With**: Choose response format (JSON, Binary, All Items, etc.)
+- **Response Code**: HTTP status code
+- **Response Headers**: Custom headers including X402 payment headers
+
+**Use Case**: Control response behavior for X402 webhooks, especially when using "Response Node" mode.
+
+## Development Scripts
 
 | Script                | Description                                                      |
 | --------------------- | ---------------------------------------------------------------- |
-| `npm run dev`         | Start n8n with your node and watch for changes (runs `n8n-node dev`) |
-| `npm run build`       | Compile TypeScript to JavaScript for production (runs `n8n-node build`) |
+| `npm run build`       | Compile TypeScript to JavaScript                                 |
 | `npm run build:watch` | Build in watch mode (auto-rebuild on changes)                    |
-| `npm run lint`        | Check your code for errors and style issues (runs `n8n-node lint`) |
-| `npm run lint:fix`    | Automatically fix linting issues when possible (runs `n8n-node lint --fix`) |
-| `npm run release`     | Create a new release (runs `n8n-node release`)                   |
+| `npm run dev`         | Start n8n with nodes loaded and hot reload                       |
+| `npm run lint`        | Check code for errors and style issues                           |
+| `npm run lint:fix`    | Automatically fix linting issues                                 |
+| `npm run release`     | Create a new release                                             |
 
-> [!TIP]
-> These scripts use the [@n8n/node-cli](https://www.npmjs.com/package/@n8n/node-cli) under the hood. You can also run CLI commands directly, e.g., `npx n8n-node dev`.
+## Project Structure
+
+```
+n8n-nodes-zyndai/
+├── nodes/
+│   └── Zynd/
+│       ├── SearchAgent.node.ts          # Zynd agent search node
+│       ├── AgentPublisher.node.ts       # Zynd agent publisher node
+│       ├── X402Webhook.node.ts          # X402 webhook with payments
+│       ├── X402RespondToWebhook.node.ts # X402 response node
+│       └── utils/                       # Utility functions
+│           ├── binary.ts                # Binary data handling
+│           ├── output.ts                # Output configuration
+│           └── utilities.ts             # Helper functions
+├── credentials/
+│   ├── ZyndAIAPI.credentials.ts         # ZyndAI API credentials
+│   └── Web3.credentials.ts              # Web3 wallet credentials
+├── icons/                               # Node icons
+│   └── zynd.svg                        # ZyndAI logo
+├── dist/                                # Compiled JavaScript (auto-generated)
+├── Dockerfile                           # Docker build configuration
+├── docker-compose.yaml                  # Docker Compose setup
+├── run.sh                               # Docker start script
+├── stop.sh                              # Docker stop script
+├── .env.example                         # Environment template
+├── package.json                         # Package configuration
+└── README.md                            # This file
+```
+
+## Key Dependencies
+
+- **viem** (^2.39.3): Ethereum library for Web3 functionality
+- **x402** (^0.7.3): Payment protocol implementation
+- **thirdweb** (^5.112.4): Web3 development framework
+- **jsonwebtoken** (^9.0.2): JWT token handling
+- **basic-auth** (^2.0.1): HTTP basic authentication
+- **isbot** (^5.1.32): Bot detection
 
 ## Troubleshooting
 
-### My node doesn't appear in n8n
+### Docker Method Issues
 
-1. Make sure you ran `npm install` to install dependencies
-2. Check that your node is listed in `package.json` under `n8n.nodes`
-3. Restart the dev server with `npm run dev`
-4. Check the console for any error messages
+**Ngrok URL not found:**
+- Ensure ngrok is installed: `ngrok version`
+- Check if port 4040 is available (ngrok web interface)
+- Review ngrok.log if it exists (created temporarily during startup)
 
-### Linting errors
+**Docker build fails:**
+- Ensure Docker daemon is running
+- Try rebuilding: `docker compose build --no-cache`
+- Check Docker logs: `docker compose logs`
 
-Run `npm run lint:fix` to automatically fix most common issues. For remaining errors, check the [n8n node development guidelines](https://docs.n8n.io/integrations/creating-nodes/).
+**Container won't start:**
+- Verify `.env` file exists and is properly configured
+- Check port 5678 is not already in use
+- Ensure sufficient disk space for Docker volumes
 
-### TypeScript errors
+### Manual Installation Issues
 
-Make sure you're using Node.js v22 or higher and have run `npm install` to get all type definitions.
+**Nodes not appearing in n8n:**
+1. Verify build completed successfully: `npm run build`
+2. Check `dist/` folder exists and contains compiled files
+3. Ensure `npm link` was successful (no errors)
+4. Verify symlink exists: `ls -la ~/.n8n/custom/`
+5. Restart n8n after building: `npx n8n start`
+6. Check package name in `package.json` is `n8n-nodes-zyndai`
+
+**Import/Build errors:**
+- Run `npm install` to ensure all dependencies are installed
+- Check Node.js version: `node --version` (v18+ recommended)
+- Clear node_modules and reinstall: `rm -rf node_modules && npm install`
+- Clear TypeScript cache: `rm -rf dist/ && npm run build`
+
+**Credential configuration errors:**
+- Verify credentials are properly saved in n8n
+- Check API keys are valid and not expired
+- Ensure correct API URL format (include https://)
+- Generate new N8N API key if needed
+
+**Webhook payment errors:**
+- Verify facilitator URL is accessible
+- Check wallet address format (must start with 0x)
+- Ensure network matches the asset being used
+- Verify sufficient funds in payer wallet for testnet
+
+**"Cannot find module" errors:**
+- Ensure all peer dependencies are installed
+- Check n8n-workflow version compatibility
+- Run `npm install` again
+- Verify symlink is correctly pointing to package
+
+### Development Issues
+
+**Hot reload not working:**
+- Use `npm run build:watch` for auto-rebuild
+- Restart n8n if changes don't appear
+- Check for TypeScript compilation errors
+
+**Linting errors:**
+- Run `npm run lint:fix` to auto-fix common issues
+- Check [n8n node development guidelines](https://docs.n8n.io/integrations/creating-nodes/)
 
 ## Resources
 
-- **[n8n Node Documentation](https://docs.n8n.io/integrations/creating-nodes/)** - Complete guide to building nodes
-- **[n8n Community Forum](https://community.n8n.io/)** - Get help and share your nodes
-- **[@n8n/node-cli Documentation](https://www.npmjs.com/package/@n8n/node-cli)** - CLI tool reference
-- **[n8n Creator Portal](https://creators.n8n.io/nodes)** - Submit your node for verification
-- **[Submit Community Nodes Guide](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/)** - Verification requirements and process
+- **[ZyndAI Documentation](https://docs.zynd.ai)** - ZyndAI platform documentation
+- **[ZyndAI Dashboard](https://dashboard.zynd.ai)** - Get API keys and manage agents
+- **[n8n Documentation](https://docs.n8n.io)** - n8n workflow automation docs
+- **[n8n Node Development](https://docs.n8n.io/integrations/creating-nodes/)** - Guide to building custom nodes
+- **[X402 Protocol](https://x402.org)** - Web3 payment protocol documentation
+- **[Viem Documentation](https://viem.sh)** - Ethereum library documentation
 
-## Contributing
+## Support
 
-Have suggestions for improving this starter? [Open an issue](https://github.com/n8n-io/n8n-nodes-starter/issues) or submit a pull request!
+For issues and questions:
+- **ZyndAI Issues**: Contact via [ZyndAI Dashboard](https://dashboard.zynd.ai)
+- **n8n Issues**: Visit [n8n Community Forum](https://community.n8n.io/)
+- **Project Issues**: Open an issue on the repository
+- **Email**: swapnilshinde9382@gmail.com
+
+## Author
+
+**Swapnil Shinde**
+- Email: swapnilshinde9382@gmail.com
+- Package: n8n-nodes-zyndai
 
 ## License
 
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+MIT
