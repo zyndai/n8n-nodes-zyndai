@@ -29,34 +29,23 @@ COPY . .
 RUN npm run build
 
 # --- Stage 2: Runner ---
+# --- Stage 2: Runner ---
 FROM n8nio/n8n:latest
 
 USER root
 
-# 1. Install System Dependencies
-RUN apk add --update --no-cache python3 make g++
+# 1. No need for python/make/g++ anymore (since we don't install deps)
+# 2. No need for /home/node/deps or NODE_PATH
 
-# 2. Setup Directories
 ENV N8N_CUSTOM_EXTENSIONS="/home/node/n8n-custom-nodes"
-ENV DEPS_DIR="/home/node/deps"
-ENV NODE_ENV=production
-# Critical: Tell Node.js where to find dependencies
-ENV NODE_PATH="$DEPS_DIR/node_modules"
-
 RUN mkdir -p $N8N_CUSTOM_EXTENSIONS/n8n-nodes-zyndai
-RUN mkdir -p $DEPS_DIR
 
-# 3. Install Production Dependencies in HIDDEN Directory
-WORKDIR $DEPS_DIR
-COPY package.json .
-RUN npm install --production --legacy-peer-deps
-
-# 4. Copy Compiled Code
+# 3. Copy ONLY the compiled code and package.json
 WORKDIR $N8N_CUSTOM_EXTENSIONS/n8n-nodes-zyndai
 COPY --from=builder /build/dist ./dist
 COPY --from=builder /build/package.json .
 
-# 5. Set Permissions
+# 4. Set Permissions
 RUN chown -R node:node /home/node
 
 USER node

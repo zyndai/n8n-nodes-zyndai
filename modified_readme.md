@@ -49,7 +49,7 @@ We implemented a **Multi-Stage Build with Dependency Isolation**:
 
 - **Node.js** (v18 or higher recommended) and npm
 - **Docker** and **Docker Compose** (for Docker installation method)
-- **ngrok** (for Docker method - automatically used by run script)
+- **ngrok** (Must be installed on host and authenticated with authtoken)
 - **n8n** (for manual installation)
 - **jq** (for run script - to parse ngrok JSON output)
 
@@ -61,7 +61,18 @@ There are two methods to run this project:
 
 This method uses Docker Compose with ngrok for automatic public URL setup.
 
-#### Start the Infrastructure
+#### Step 1: Configure Ngrok
+
+The `run.sh` script relies on `ngrok` to create a public tunnel. You must have ngrok installed and authenticated.
+
+1.  **Install ngrok**: [https://ngrok.com/download](https://ngrok.com/download)
+2.  **Connect your account**:
+    ```bash
+    ngrok config add-authtoken <YOUR_AUTH_TOKEN>
+    ```
+    (Get your token from the [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken))
+
+#### Step 2: Start the Infrastructure
 
 ```bash
 ./run.sh
@@ -76,7 +87,7 @@ This script will:
 Access n8n Editor at: `http://localhost:5678` (Recommended for editing to avoid ngrok rate limits)
 Webhooks are accessible at: `https://xxxx.ngrok-free.app`
 
-#### Stop the Infrastructure
+#### Step 3: Stop the Infrastructure
 
 ```bash
 ./stop.sh
