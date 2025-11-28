@@ -1,0 +1,15 @@
+node_modules
+.git
+.gitignore
+.env
+.env.*
+*.log
+.DS_Store
+# REMOVED package-lock.json from here
+# REMOVED yarn.lock from here
+docker-compose.yaml
+Dockerfile
+README.md
+data_n8n
+run.sh
+stop.sh

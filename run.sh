@@ -29,6 +29,8 @@ if [[ -z "$NGROK_URL" || "$NGROK_URL" == "null" ]]; then
 fi
 
 echo "✅ Ngrok URL found: $NGROK_URL"
+echo "👉 Access n8n Editor at: http://localhost:5678 (Use this to avoid ngrok rate limits)"
+echo "👉 Use Ngrok URL for Webhooks: $NGROK_URL"
 
 # ---- Strip protocol (https://example.ngrok-free.app → example.ngrok-free.app) ----
 HOST="${NGROK_URL#*://}"
@@ -63,6 +65,7 @@ update_env "N8N_PORT" "5678"
 update_env "N8N_EDITOR_BASE_URL" "https://$HOST"
 update_env "N8N_PUBLIC_API_BASE_URL" "https://$HOST"
 update_env "WEBHOOK_URL" "https://$HOST"
+update_env "N8N_PROXY_HOPS" "1"
 
 
 echo "Updated values:"
