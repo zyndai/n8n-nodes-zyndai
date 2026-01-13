@@ -105,7 +105,7 @@ export class AgentPublisher implements INodeType {
                     }
                     
                     await this.helpers.httpRequest({
-                        method: 'POST',
+                        method: 'PATCH',
                         url: `${apiUrl}/agents/update-webhook`,
                         headers: {
                             'Accept': 'application/json',
