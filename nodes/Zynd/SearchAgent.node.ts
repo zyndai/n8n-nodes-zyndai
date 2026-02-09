@@ -129,7 +129,7 @@ export class SearchAgent implements INodeType {
 				// Execute GET request
 				const response = await this.helpers.httpRequest({
 					method: 'GET',
-					url: `${apiUrl}/search/agents`,
+					url: `${apiUrl}/agents`,
 					qs,
 					json: true,
 					timeout: 10000,
