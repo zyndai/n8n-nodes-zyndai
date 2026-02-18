@@ -128,45 +128,44 @@ export class SearchAgent implements INodeType {
 					return Array.isArray(response?.data) ? response.data : [];
 				};
 
-				// Fire all applicable searches in parallel
-				const searchPromises: Promise<any[]>[] = [];
-				const searchLabels: string[] = [];
-
-				// Search by name (using keyword value)
-				if (keyword.length > 0) {
-					searchPromises.push(fetchAgents({ ...baseQs, name: keyword }));
-					searchLabels.push('name');
-				}
-
-				// Search by capabilities
-				if (capabilitiesCsv.length > 0) {
-					searchPromises.push(fetchAgents({ ...baseQs, capabilities: capabilitiesCsv }));
-					searchLabels.push('capabilities');
-				}
-
-				// Search by keyword
-				if (keyword.length > 0) {
-					searchPromises.push(fetchAgents({ ...baseQs, keyword }));
-					searchLabels.push('keyword');
-				}
-
-				// If no search criteria provided, fetch all with base params
-				if (searchPromises.length === 0) {
-					searchPromises.push(fetchAgents({ ...baseQs }));
-					searchLabels.push('all');
-				}
-
-				// Await all searches in parallel
-				const searchResults = await Promise.all(searchPromises);
-
-				// Merge and deduplicate results by agent id
+				// Merge and deduplicate helper
 				const agentMap = new Map<string, any>();
-				for (const agents of searchResults) {
+				const addToMap = (agents: any[]) => {
 					for (const agent of agents) {
 						if (agent.id && !agentMap.has(agent.id)) {
 							agentMap.set(agent.id, agent);
 						}
 					}
+				};
+
+				const searchLabels: string[] = [];
+
+				// 1. Search by name first (using keyword value)
+				if (keyword.length > 0) {
+					const nameResults = await fetchAgents({ ...baseQs, name: keyword });
+					addToMap(nameResults);
+					searchLabels.push('name');
+				}
+
+				// 2. Search by keyword
+				if (keyword.length > 0) {
+					const keywordResults = await fetchAgents({ ...baseQs, keyword });
+					addToMap(keywordResults);
+					searchLabels.push('keyword');
+				}
+
+				// 3. Search by capabilities
+				if (capabilitiesCsv.length > 0) {
+					const capResults = await fetchAgents({ ...baseQs, capabilities: capabilitiesCsv });
+					addToMap(capResults);
+					searchLabels.push('capabilities');
+				}
+
+				// If no search criteria provided, fetch all
+				if (searchLabels.length === 0) {
+					const allResults = await fetchAgents({ ...baseQs });
+					addToMap(allResults);
+					searchLabels.push('all');
 				}
 
 				const combinedAgents = Array.from(agentMap.values());
