@@ -32,14 +32,6 @@ export class SearchAgent implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Agent Name',
-				name: 'agentName',
-				type: 'string',
-				default: '',
-				placeholder: 'e.g., shlok agent, weather bot',
-				description: 'Search agent by name',
-			},
-			{
 				displayName: 'Agent Keyword',
 				name: 'agentKeyword',
 				type: 'string',
@@ -101,7 +93,6 @@ export class SearchAgent implements INodeType {
 		for (let i = 0; i < items.length; i++) {
 			try {
 				// Get parameters for this item
-				const agentName = (this.getNodeParameter('agentName', i, '') as string).trim();
 				const capabilitiesArr = this.getNodeParameter('capabilities', i, []) as string[];
 				const maxResults = this.getNodeParameter('maxResults', i, 10) as number;
 				const keyword = (this.getNodeParameter('agentKeyword', i, '') as string).trim();
@@ -141,9 +132,9 @@ export class SearchAgent implements INodeType {
 				const searchPromises: Promise<any[]>[] = [];
 				const searchLabels: string[] = [];
 
-				// Search by name
-				if (agentName.length > 0) {
-					searchPromises.push(fetchAgents({ ...baseQs, name: agentName }));
+				// Search by name (using keyword value)
+				if (keyword.length > 0) {
+					searchPromises.push(fetchAgents({ ...baseQs, name: keyword }));
 					searchLabels.push('name');
 				}
 
@@ -185,7 +176,6 @@ export class SearchAgent implements INodeType {
 					returnData.push({
 						json: {
 							query: {
-								name: agentName,
 								keyword,
 								capabilities: capabilitiesArr,
 								maxResults,
@@ -205,7 +195,6 @@ export class SearchAgent implements INodeType {
 				returnData.push({
 					json: {
 						query: {
-							name: agentName,
 							keyword,
 							capabilities: capabilitiesArr,
 							maxResults,
@@ -262,7 +251,6 @@ export class SearchAgent implements INodeType {
 						json: {
 							error: error.message || 'Unknown error occurred',
 							query: {
-								name: this.getNodeParameter('agentName', i, ''),
 								keyword: this.getNodeParameter('agentKeyword', i, ''),
 								capabilities: this.getNodeParameter('capabilities', i, []),
 							},
