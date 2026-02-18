@@ -23,14 +23,22 @@ export class SearchAgent implements INodeType {
 		credentials: [
 			{
 				name: 'web3wallet',
-				required: false
+				required: false,
 			},
 			{
 				name: 'zyndAiApi',
-				required: false
+				required: false,
 			},
 		],
 		properties: [
+			{
+				displayName: 'Agent Name',
+				name: 'agentName',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g., shlok agent, weather bot',
+				description: 'Search agent by name',
+			},
 			{
 				displayName: 'Agent Keyword',
 				name: 'agentKeyword',
@@ -85,14 +93,15 @@ export class SearchAgent implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
-		
+
 		const credentials = await this.getCredentials('zyndAiApi');
 		const apiUrl = credentials.apiUrl as string;
-		
+
 		// Process each input item
 		for (let i = 0; i < items.length; i++) {
 			try {
 				// Get parameters for this item
+				const agentName = (this.getNodeParameter('agentName', i, '') as string).trim();
 				const capabilitiesArr = this.getNodeParameter('capabilities', i, []) as string[];
 				const maxResults = this.getNodeParameter('maxResults', i, 10) as number;
 				const keyword = (this.getNodeParameter('agentKeyword', i, '') as string).trim();
@@ -100,54 +109,88 @@ export class SearchAgent implements INodeType {
 
 				// Build capabilities CSV
 				const capabilitiesCsv = capabilitiesArr
-					.map(c => c.trim())
-					.filter(c => c.length > 0)
+					.map((c) => c.trim())
+					.filter((c) => c.length > 0)
 					.join(',');
 
-				// Build query string
-				const qs: Record<string, any> = {
+				// Build base query string (shared across all searches)
+				const baseQs: Record<string, any> = {
 					limit: maxResults,
 					offset: 0,
 				};
 
 				// Only add status if not ALL
 				if (statusFilter !== 'ALL') {
-					qs.status = statusFilter;
+					baseQs.status = statusFilter;
 				}
 
-				// Add capabilities if provided
+				// Helper to make an API call with given query params
+				const fetchAgents = async (qs: Record<string, any>): Promise<any[]> => {
+					const response = await this.helpers.httpRequest({
+						method: 'GET',
+						url: `${apiUrl}/agents`,
+						qs,
+						json: true,
+						timeout: 10000,
+						returnFullResponse: false,
+					});
+					return Array.isArray(response?.data) ? response.data : [];
+				};
+
+				// Fire all applicable searches in parallel
+				const searchPromises: Promise<any[]>[] = [];
+				const searchLabels: string[] = [];
+
+				// Search by name
+				if (agentName.length > 0) {
+					searchPromises.push(fetchAgents({ ...baseQs, name: agentName }));
+					searchLabels.push('name');
+				}
+
+				// Search by capabilities
 				if (capabilitiesCsv.length > 0) {
-					qs.capabilities = capabilitiesCsv;
+					searchPromises.push(fetchAgents({ ...baseQs, capabilities: capabilitiesCsv }));
+					searchLabels.push('capabilities');
 				}
 
-				// Add keyword if provided
+				// Search by keyword
 				if (keyword.length > 0) {
-					qs.keyword = keyword;
+					searchPromises.push(fetchAgents({ ...baseQs, keyword }));
+					searchLabels.push('keyword');
 				}
 
+				// If no search criteria provided, fetch all with base params
+				if (searchPromises.length === 0) {
+					searchPromises.push(fetchAgents({ ...baseQs }));
+					searchLabels.push('all');
+				}
 
-				// Execute GET request
-				const response = await this.helpers.httpRequest({
-					method: 'GET',
-					url: `${apiUrl}/agents`,
-					qs,
-					json: true,
-					timeout: 10000,
-					returnFullResponse: false,
-				});
+				// Await all searches in parallel
+				const searchResults = await Promise.all(searchPromises);
 
-				// Extract only the data we need (avoid circular references)
-				const agentsList = Array.isArray(response?.data) ? response.data : [];
+				// Merge and deduplicate results by agent id
+				const agentMap = new Map<string, any>();
+				for (const agents of searchResults) {
+					for (const agent of agents) {
+						if (agent.id && !agentMap.has(agent.id)) {
+							agentMap.set(agent.id, agent);
+						}
+					}
+				}
+
+				const combinedAgents = Array.from(agentMap.values());
 
 				// If no agents found, return appropriate message
-				if (agentsList.length === 0) {
+				if (combinedAgents.length === 0) {
 					returnData.push({
 						json: {
 							query: {
+								name: agentName,
 								keyword,
 								capabilities: capabilitiesArr,
 								maxResults,
 								statusFilter,
+								searchesPerformed: searchLabels,
 							},
 							results: [],
 							count: 0,
@@ -162,27 +205,29 @@ export class SearchAgent implements INodeType {
 				returnData.push({
 					json: {
 						query: {
+							name: agentName,
 							keyword,
 							capabilities: capabilitiesArr,
 							maxResults,
 							statusFilter,
+							searchesPerformed: searchLabels,
 						},
-						results: agentsList.map((agent: any) => ({
+						results: combinedAgents.map((agent: any) => ({
 							id: agent.id,
 							name: agent.name || 'Unknown',
 							didIdentifier: agent.didIdentifier,
 							description: agent.description || '',
 							capabilities: agent.capabilities || {},
-							httpWebhookUrl: agent.httpWebhookUrl || ''
+							httpWebhookUrl: agent.httpWebhookUrl || '',
 						})),
-						count: agentsList.length,
+						count: combinedAgents.length,
 						timestamp: new Date().toISOString(),
 					},
 					pairedItem: { item: i },
 				});
 
 				// Add each agent as separate item for easy workflow processing
-				for (const agent of agentsList) {
+				for (const agent of combinedAgents) {
 					// Create a clean object with only the properties we need
 					const cleanAgent = {
 						// Agent details
@@ -206,11 +251,10 @@ export class SearchAgent implements INodeType {
 					};
 
 					returnData.push({
-						json: cleanAgent, // Use the clean object
+						json: cleanAgent,
 						pairedItem: { item: i },
 					});
 				}
-
 			} catch (error) {
 				// Handle errors gracefully
 				if (this.continueOnFail()) {
@@ -218,8 +262,9 @@ export class SearchAgent implements INodeType {
 						json: {
 							error: error.message || 'Unknown error occurred',
 							query: {
+								name: this.getNodeParameter('agentName', i, ''),
 								keyword: this.getNodeParameter('agentKeyword', i, ''),
-								capabilities: this.getNodeParameter('capabilities', i, [])
+								capabilities: this.getNodeParameter('capabilities', i, []),
 							},
 							success: false,
 						},
