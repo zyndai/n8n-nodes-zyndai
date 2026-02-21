@@ -71,6 +71,10 @@ export class AgentPublisher implements INodeType {
 					throw new Error('Add webhook node to your workflow before publishing the agent.');
 				}
 
+				// Strip workflow response to a plain serializable object (the raw httpRequest
+				// response can contain circular references like Agent/socket objects)
+				const workflowData = JSON.parse(JSON.stringify(workflowResponse));
+
 				// POST request to register agent -> uses workflow json to create new agent on zynd
 				const registerAgentResponse = await this.helpers.httpRequest({
 					method: 'POST',
@@ -80,7 +84,7 @@ export class AgentPublisher implements INodeType {
 						'Content-Type': 'application/json',
 						'X-API-KEY': credentials.apiKey as string,
 					},
-					body: workflowResponse,
+					body: workflowData,
 					json: true,
 					timeout: 10000,
 					returnFullResponse: false,
@@ -107,10 +111,10 @@ export class AgentPublisher implements INodeType {
 							'Content-Type': 'application/json',
 							'X-API-KEY': credentials.apiKey as string,
 						},
-						body: JSON.stringify({
+						body: {
 							agentId: registerAgentResponse.id,
 							httpWebhookUrl: webhookUrl,
-						}),
+						},
 						json: true,
 						timeout: 10000,
 						returnFullResponse: false,
