@@ -29,6 +29,7 @@
 	},
 	"devDependencies": {
 		"@types/express": "^4.17.6",
+		"@types/jsonwebtoken": "^9.0.10",
 		"@types/lodash": "^4.14.202",
 		"@types/node": "^20.11.24",
 		"esbuild": "^0.20.0",
@@ -40,9 +41,11 @@
 		"typescript": "^5.5.3"
 	},
 	"dependencies": {
+		"jsonwebtoken": "^9.0.3",
 		"lodash": "^4.17.21",
 		"sqlite3": "^5.1.7",
 		"stream": "^0.0.3",
+		"tmp-promise": "^3.0.3",
 		"viem": "^2.39.3",
 		"x402": "^0.7.3",
 		"x402-fetch": "^0.7.3"

@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import set from 'lodash/set';
 import type {
 	IDataObject,
@@ -23,7 +24,7 @@ import type { Readable } from 'stream';
 
 import { getBinaryResponse } from './utils/binary';
 import { configuredOutputs } from './utils/output';
-import { generatePairedItemData } from './utils/utilities';
+import { formatPrivateKey, generatePairedItemData } from './utils/utilities';
 
 const respondWithProperty: INodeProperties = {
 	displayName: 'Respond With',
@@ -49,6 +50,11 @@ const respondWithProperty: INodeProperties = {
 			name: 'JSON',
 			value: 'json',
 			description: 'Respond with a custom JSON body',
+		},
+		{
+			name: 'JWT Token',
+			value: 'jwt',
+			description: 'Respond with a JWT token',
 		},
 		{
 			name: 'No Data',
@@ -84,7 +90,17 @@ export class X402RespondToWebhook implements INodeType {
 		},
 		inputs: [NodeConnectionTypes.Main],
 		outputs: `={{(${configuredOutputs})($nodeVersion, $parameter)}}`,
-		credentials: [],
+		credentials: [
+			{
+				name: 'jwtAuth',
+				required: true,
+				displayOptions: {
+					show: {
+						respondWith: ['jwt'],
+					},
+				},
+			},
+		],
 		properties: [
 			{
 				displayName: 'Enable Response Output Branch',
@@ -113,13 +129,24 @@ export class X402RespondToWebhook implements INodeType {
 				displayOptions: { show: { '@version': [{ _cnd: { gte: 1.2 } }] } },
 			},
 			{
+				displayName: 'Credentials',
+				name: 'credentials',
+				type: 'credentials',
+				default: '',
+				displayOptions: {
+					show: {
+						respondWith: ['jwt'],
+					},
+				},
+			},
+			{
 				displayName:
 					'When using expressions, note that this node will only run for the first item in the input data',
 				name: 'webhookNotice',
 				type: 'notice',
 				displayOptions: {
 					show: {
-						respondWith: ['json', 'text'],
+						respondWith: ['json', 'text', 'jwt'],
 					},
 				},
 				default: '',
@@ -334,7 +361,7 @@ export class X402RespondToWebhook implements INodeType {
 			FORM_TRIGGER_NODE_TYPE,
 			CHAT_TRIGGER_NODE_TYPE,
 			WAIT_NODE_TYPE,
-            "CUSTOM.zyndX402Webhook"
+			'CUSTOM.zyndX402Webhook',
 		];
 
 		let response: IN8nHttpFullResponse;
@@ -356,7 +383,7 @@ export class X402RespondToWebhook implements INodeType {
 						new Error('No Webhook node found in the workflow'),
 						{
 							description:
-								'Insert a Webhook node to your workflow and set the “Respond” parameter to “Using Respond to Webhook Node” ',
+								'Insert a Webhook node to your workflow and set the "Respond" parameter to "Using Respond to Webhook Node" ',
 						},
 					);
 				}
@@ -398,6 +425,36 @@ export class X402RespondToWebhook implements INodeType {
 					this.sendChunk('begin', 0);
 					this.sendChunk('item', 0, responseBody as IDataObject);
 					this.sendChunk('end', 0);
+				}
+			} else if (respondWith === 'jwt') {
+				try {
+					const { keyType, secret, algorithm, privateKey } = await this.getCredentials<{
+						keyType: 'passphrase' | 'pemKey';
+						privateKey: string;
+						secret: string;
+						algorithm: jwt.Algorithm;
+					}>('jwtAuth');
+
+					let secretOrPrivateKey;
+
+					if (keyType === 'passphrase') {
+						secretOrPrivateKey = secret;
+					} else {
+						secretOrPrivateKey = formatPrivateKey(privateKey);
+					}
+					const payload = this.getNodeParameter('payload', 0, {}) as IDataObject;
+					const token = jwt.sign(payload, secretOrPrivateKey, { algorithm });
+					responseBody = { token };
+
+					if (shouldStream) {
+						this.sendChunk('begin', 0);
+						this.sendChunk('item', 0, responseBody as IDataObject);
+						this.sendChunk('end', 0);
+					}
+				} catch (error) {
+					throw new NodeOperationError(this.getNode(), error as Error, {
+						message: 'Error signing JWT token',
+					});
 				}
 			} else if (respondWith === 'allIncomingItems') {
 				const respondItems = items.map((item, index) => {
