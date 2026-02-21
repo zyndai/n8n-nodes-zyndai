@@ -83,7 +83,7 @@ export class AgentPublisher implements INodeType {
 							'X-N8N-API-KEY': credentials.n8nApiKey as string,
 						},
 						json: true,
-						timeout: 10000,
+						timeout: 30000,
 						returnFullResponse: false,
 					});
 					console.log('[AgentPublisher] DEBUG: Step 1 OK - typeof:', typeof workflowResponse);
@@ -138,7 +138,7 @@ export class AgentPublisher implements INodeType {
 						},
 						body: workflowData,
 						json: true,
-						timeout: 10000,
+						timeout: 60000,
 						returnFullResponse: false,
 					});
 					console.log('[AgentPublisher] DEBUG: Step 4 OK - typeof:', typeof registerAgentResponse);
@@ -198,7 +198,7 @@ export class AgentPublisher implements INodeType {
 							},
 							body: patchBody,
 							json: true,
-							timeout: 10000,
+							timeout: 30000,
 							returnFullResponse: false,
 						});
 						console.log('[AgentPublisher] DEBUG: Step 6 OK');

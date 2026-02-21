@@ -411,12 +411,10 @@ export class X402RespondToWebhook implements INodeType {
 					} else {
 						try {
 							responseBody = jsonParse(responseBodyParameter);
-						} catch (error) {
-							throw new NodeOperationError(this.getNode(), error as Error, {
-								message: "Invalid JSON in 'Response Body' field",
-								description:
-									"Check that the syntax of the JSON in the 'Response Body' parameter is valid",
-							});
+						} catch (_error) {
+							// If the value is not valid JSON (e.g. a plain string from an expression),
+							// wrap it in a JSON object so the response can still be sent.
+							responseBody = { output: responseBodyParameter };
 						}
 					}
 				}
