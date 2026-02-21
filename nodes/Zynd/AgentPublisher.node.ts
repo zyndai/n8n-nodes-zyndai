@@ -40,7 +40,7 @@ export class AgentPublisher implements INodeType {
 		const workflowId = this.getWorkflow();
 		let webHookId: string;
 		let webhookType: 'NORMAL' | 'X402' = 'NORMAL';
-		let webhookPath = '';
+		let webhookPath = 'pay';
 
 		// Process each input item
 		for (let i = 0; i < items.length; i++) {
@@ -60,16 +60,13 @@ export class AgentPublisher implements INodeType {
 				});
 
 				try {
-					const webhookNode = workflowResponse.nodes.filter((node: any) => {
+					webHookId = workflowResponse.nodes.filter((node: any) => {
 						if (node.type === 'CUSTOM.zyndX402Webhook') {
 							webhookType = 'X402';
 							return true;
 						}
 						return false;
-					})[0];
-					webHookId = webhookNode.webhookId;
-					// Read the actual path configured on the webhook node
-					webhookPath = webhookNode.parameters?.path || '';
+					})[0].webhookId;
 				} catch {
 					throw new Error('Add webhook node to your workflow before publishing the agent.');
 				}
@@ -93,18 +90,13 @@ export class AgentPublisher implements INodeType {
 				const hdKey = HDKey.fromMasterSeed(seed);
 				const account = hdKeyToAccount(hdKey);
 
-				// Extract webhook ID and path from workflow response, build the full webhook URL
+				// Extract webhook ID from workflow response and update agent with webhook URL on zynd
 				if (webHookId) {
 					let webhookUrl: string;
 					if (webhookType === 'NORMAL') {
 						webhookUrl = `${n8nApiUrl}webhook/${webHookId}`;
 					} else {
-						// Build URL: base/webhook/{webhookId}/{path} (path comes from node config)
-						if (webhookPath) {
-							webhookUrl = `${n8nApiUrl}webhook/${webHookId}/${webhookPath}`;
-						} else {
-							webhookUrl = `${n8nApiUrl}webhook/${webHookId}`;
-						}
+						webhookUrl = `${n8nApiUrl}webhook/${webHookId}/${webhookPath}`;
 					}
 
 					await this.helpers.httpRequest({
