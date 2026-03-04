@@ -78,13 +78,13 @@ const respondWithProperty: INodeProperties = {
 
 export class X402RespondToWebhook implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Zynd X402 Respond to Webhook',
+		displayName: 'Zynd Respond to X402 Webhook',
 		icon: { light: 'file:../../icons/zynd.svg', dark: 'file:../../icons/zynd.svg' },
 		name: 'zyndRespondToWebhook',
 		group: ['transform'],
 		version: [1, 1.1, 1.2, 1.3, 1.4, 1.5],
 		defaultVersion: 1.5,
-		description: 'Returns data for Webhook',
+		description: 'Send response data back to the caller of a Zynd X402 Webhook — supports JSON, text, binary, and redirect',
 		defaults: {
 			name: 'Respond to Webhook',
 		},

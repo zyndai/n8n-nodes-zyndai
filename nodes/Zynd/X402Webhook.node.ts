@@ -24,7 +24,7 @@ export class X402Webhook implements INodeType {
 		version: 1,
 		subtitle: '={{$parameter["httpMethod"]}} - x402 Payment ({{$parameter["price"]}})',
 		description:
-			'Starts the workflow when a webhook is called, with optional x402 payment verification',
+			'Receive webhook requests with x402 payment verification — monetize any n8n workflow with USDC micropayments',
 		eventTriggerDescription: 'Waiting for you to call the Test URL',
 		activationMessage: 'You can now make calls to your production webhook URL.',
 		defaults: {

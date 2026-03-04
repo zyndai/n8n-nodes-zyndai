@@ -84,7 +84,7 @@ export class X402HttpRequest implements INodeType {
 		icon: { light: 'file:../../icons/zynd.svg', dark: 'file:../../icons/zynd.svg' },
 		group: ['transform'],
 		version: 1,
-		description: 'Make HTTP requests with automatic x402 payment handling',
+		description: 'Make HTTP requests to paid AI agents with automatic x402 micropayment handling (USDC on EVM chains)',
 		usableAsTool: true,
 		defaults: {
 			name: 'HTTP Request (x402)',
