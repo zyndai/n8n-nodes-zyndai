@@ -17,6 +17,7 @@ esbuild.build({
     external: [
         'n8n-workflow',
         'ws',
+        'jsonwebtoken',
         '@solana/*',
     ],
     sourcemap: true,
