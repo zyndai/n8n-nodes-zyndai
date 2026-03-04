@@ -80,7 +80,7 @@ export class X402RespondToWebhook implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Zynd X402 Respond to Webhook',
 		icon: { light: 'file:../../icons/zynd.svg', dark: 'file:../../icons/zynd.svg' },
-		name: 'respondToWebhook',
+		name: 'zyndRespondToWebhook',
 		group: ['transform'],
 		version: [1, 1.1, 1.2, 1.3, 1.4, 1.5],
 		defaultVersion: 1.5,
