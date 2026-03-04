@@ -13,7 +13,7 @@ export class SearchAgent implements INodeType {
 		icon: { light: 'file:../../icons/zynd.svg', dark: 'file:../../icons/zynd.svg' },
 		group: ['transform'],
 		version: 1,
-		description: 'Search for agents by capabilities on the ZyndAI network',
+		description: 'Discover AI agents by keyword or capability on the Zynd network — find agents for any task across frameworks',
 		defaults: {
 			name: 'Zynd Agent Search',
 		},
@@ -36,8 +36,8 @@ export class SearchAgent implements INodeType {
 				name: 'agentKeyword',
 				type: 'string',
 				default: 'assistant',
-				placeholder: 'e.g., translation, weather, assistant',
-				description: 'Search agent by any keyword (name, description, etc.)',
+				placeholder: 'e.g., translation, weather, stock analysis',
+				description: 'Search for agents using a keyword or phrase — matches against name, description, and capabilities',
 			},
 			{
 				displayName: 'Capabilities',

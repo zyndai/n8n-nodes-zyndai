@@ -6,7 +6,7 @@ import type {
 export class Web3 implements ICredentialType {
     name = 'web3wallet';
 
-    displayName = 'Web3 Wallet Credentials';
+    displayName = 'Zynd Web3 Wallet';
 
     properties: INodeProperties[] = [
         {

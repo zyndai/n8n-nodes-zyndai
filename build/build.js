@@ -14,7 +14,12 @@ esbuild.build({
     target: 'node18',
     outdir: 'dist',
     format: 'cjs',           // CRITICAL: Forces CommonJS output for n8n
-    external: ['n8n-workflow'],
+    external: [
+        'n8n-workflow',
+        'ws',
+        'jsonwebtoken',
+        '@solana/*',
+    ],
     sourcemap: true,
     logLevel: 'info',
 }).catch(() => process.exit(1));

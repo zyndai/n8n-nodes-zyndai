@@ -33,7 +33,7 @@ export class AgentPublisher implements INodeType {
 		icon: { light: 'file:../../icons/zynd.svg', dark: 'file:../../icons/zynd.svg' },
 		group: ['transform'],
 		version: 1,
-		description: 'Create and publish your n8n to the ZyndAI network',
+		description: 'Publish your n8n workflow as a discoverable AI agent on the Zynd network with DID identity and webhook registration',
 		defaults: {
 			name: 'Zynd Agent Publisher',
 		},

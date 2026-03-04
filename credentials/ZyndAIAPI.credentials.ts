@@ -6,7 +6,7 @@ import type {
 export class ZyndAIAPI implements ICredentialType {
 	name = 'zyndAiApi';
 
-	displayName = 'ZyndAI API';
+	displayName = 'Zynd AI API';
 
 	documentationUrl = 'https://docs.zynd.ai/authentication';
 

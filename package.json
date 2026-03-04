@@ -1,7 +1,16 @@
 {
 	"name": "n8n-nodes-zyndai",
 	"version": "0.1.0",
-	"description": "",
+	"description": "n8n community nodes for the Zynd AI Network — agent discovery, cross-framework communication, and x402 micropayments",
+	"keywords": [
+		"n8n-community-node-package",
+		"n8n",
+		"zynd",
+		"ai-agents",
+		"x402",
+		"micropayments",
+		"web3"
+	],
 	"license": "MIT",
 	"scripts": {
 		"build": "node build/build.js && gulp",
